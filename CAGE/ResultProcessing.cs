@@ -69,12 +69,16 @@ namespace CAGE
         {
             return CoordinatesAllFish.Select((Coordinates) =>
             {
+                //direction left or right, left < 0
+                //right > 0
                 double x_last = Coordinates.First().x;
                 double direction = 0;
+                //returns all points where direction changes
                 return Coordinates.Skip(1).Where((e) =>
                 {
                     double newDirection = e.x- x_last;
                     x_last = e.x;
+                    //checks if dirrection changed => both negative or both positive > 0
                     bool differentDirection = newDirection * direction < 0;
                     direction = newDirection;
                     return differentDirection;
@@ -86,10 +90,13 @@ namespace CAGE
         //return if 4 dots remain (3 for tail, 1 for head)
         public static List<(double x, double y)[]> FilterHeadAndTailCandidates(List<(double x, double y)[]> Candidates, double epsilon = 5)
         {
-
+            //get distance from each point (start with 0 index)
+            //if distance 2 small remove all other points that are nearby.
+            //repeat
             return Candidates.Where((candidate) =>{
                 for (int i = 0; i < candidate.Length; i++)
                 {
+
                     var comparatorCoordinates = candidate[i];
                     candidate = candidate.Skip(i).Where((e) => CalculateDistance(comparatorCoordinates.x, comparatorCoordinates.y, e.x, e.y) < epsilon).ToArray();
                 }
@@ -104,6 +111,7 @@ namespace CAGE
             //find added distances for each dot, head is furthest away;
             return Fishes.Select((fish) =>
             {
+                
                 var distances = fish.Select((coordinates) =>
                 {
                     return fish.Aggregate(0.0, (total, next) => total + CalculateDistance(coordinates.x, coordinates.y, next.x, next.y));
@@ -112,6 +120,8 @@ namespace CAGE
                 int HeadIndex = Array.IndexOf(distances,distances.Max());
 
                 var head = fish[HeadIndex];
+
+                //tail is always in the middle 
                 var tail = fish.Where((e, i) => i != HeadIndex).OrderBy((e) => e.y).ToArray()[2];
                 double distance = CalculateDistance(head.x, head.y, tail.x, tail.y);
                 return (head, tail, distance);
@@ -125,8 +135,7 @@ namespace CAGE
         {
             return Math.Sqrt(Math.Pow(x1 -x2,2) + Math.Pow(y1 -y2, 2));
         }
-            //pairs up fish on Right and Left image
-       
+          
 
         //pair up fish on upper and lower camera
         public static List<(((double x, double y) head, (double x, double y) tail, double distance) uperFish, ((double x, double y) head, (double x, double y) tail, double distance) lowerFish)> pairUpFish(List<((double x, double y) head, (double x, double y) tail, double distance)> UperFishes, List<((double x, double y) head, (double x, double y) tail, double distance)>  LowerFishes, double epsilon = 5)
@@ -135,6 +144,7 @@ namespace CAGE
 
             UperFishes.ForEach((upperFish) =>
             {
+                //find first fish that is similar coordinates head, tail and distance
                 var pairedFish = LowerFishes.FirstOrDefault((lowerFish) =>
                 {
                     bool head = Math.Abs(lowerFish.head.x - upperFish.head.x) < epsilon && Math.Abs(lowerFish.head.y - upperFish.head.y) < epsilon;
