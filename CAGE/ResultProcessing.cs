@@ -19,7 +19,7 @@ namespace CAGE
         //they have the same name the only difference is top camera is marked with t, bottom is marked with b
         public static (string UpperCameraImage, string LowerCamerImage)[] pairUpImages(string folder)
         {
-            string[] files = Directory.GetFiles(folder);
+            string[] files = Directory.GetFiles(folder,"*.txt");
             files = files.Select((file) => Path.GetFileNameWithoutExtension(file)).ToArray();
 
             string[] UpperCameraFiles = files.Where((e) => e.Contains("t")).ToArray();
