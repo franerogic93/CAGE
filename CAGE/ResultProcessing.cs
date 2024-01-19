@@ -14,6 +14,20 @@ namespace CAGE
         public static int ImageWidth = 1626;
         public static int ImageHeight = 1236;
       
+        //stero camera has 2 images Upper and lower
+        //get file_path_pairs based on name
+        //they have the same name the only difference is top camera is marked with t, bottom is marked with b
+        public static (string UpperCameraImage, string LowerCamerImage)[] pairUpImages(string folder)
+        {
+            string[] files = Directory.GetFiles(folder);
+            files = files.Select((file) => Path.GetFileNameWithoutExtension(file)).ToArray();
+
+            string[] UpperCameraFiles = files.Where((e) => e.Contains("t")).ToArray();
+
+            return UpperCameraFiles.Zip(UpperCameraFiles, (first, second) => (first, second.Replace("t", "b"))).ToArray();
+        }
+
+
         //get (X,Y)[] coordinates for each fish detection
         public static List<(double x, double y)[]> GetCoordinates(string txt)
         {
