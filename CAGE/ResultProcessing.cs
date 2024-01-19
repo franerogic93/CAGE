@@ -13,6 +13,39 @@ namespace CAGE
 
         public static int ImageWidth = 1626;
         public static int ImageHeight = 1236;
+
+        public static void runInOrder(string folder, string saveFolder)
+        {
+            (string UpperCameraImage, string LowerCameraImage)[] LabelPairs = pairUpImages(folder);
+
+            List<(((double x, double y) head, (double x, double y) tail, double distance) uperFish, ((double x, double y) head, (double x, double y) tail, double distance) lowerFish)[]> AllFishPairs = new List<(((double x, double y) head, (double x, double y) tail, double distance) uperFish, ((double x, double y) head, (double x, double y) tail, double distance) lowerFish)[]>();
+
+             foreach(var labelPair in LabelPairs)
+            {
+                string UpperLabels = File.ReadAllText(labelPair.UpperCameraImage);
+                string LowerLabels = File.ReadAllText(labelPair.LowerCameraImage);
+
+                List<(double x, double y)[]> UpperCoordinates = GetCoordinates(UpperLabels);
+                List<(double x, double y)[]> LowerCoordinates = GetCoordinates(LowerLabels);
+
+                UpperCoordinates = FindHeadAndTailCandidates(UpperCoordinates);
+                LowerCoordinates = FindHeadAndTailCandidates(LowerCoordinates);
+
+                UpperCoordinates = FilterHeadAndTailCandidates(UpperCoordinates);
+                LowerCoordinates = FilterHeadAndTailCandidates(LowerCoordinates);
+
+                List<((double x, double y) head, (double x, double y) tail, double distance)> UpperCoordinatesHeadTail = FindHeadAndTail(UpperCoordinates);
+                List<((double x, double y) head, (double x, double y) tail, double distance)> LowerCoordinatesHeadTail = FindHeadAndTail(LowerCoordinates);
+
+               (((double x, double y) head, (double x, double y) tail, double distance) uperFish, ((double x, double y) head, (double x, double y) tail, double distance) lowerFish)[] fishPairs = pairUpFish(UpperCoordinatesHeadTail, LowerCoordinatesHeadTail).ToArray();
+                AllFishPairs.Add(fishPairs);
+            };
+
+            var fishFatPairs = AllFishPairs.SelectMany((afp) => afp);
+
+
+
+        }
       
         //stero camera has 2 images Upper and lower
         //get file_path_pairs based on name
